@@ -79,9 +79,10 @@ shift `expr $OPTIND - 1`
 q=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
 
 # get results
-r=`curl -s "http://torrentz.eu/search?f=$q" \
+cookie=`date +"%a %b %d %Y %T GMT%z (%Z)"`
+r=`curl -A Mozilla -b "_SESS=$cookie" -s "https://torrentz.eu/search?f=$q" \
 	| grep -Eo '<dl><dt><a href=\"\/[[:alnum:]]*\">.*</a>|<span class=\"[speud]*\">[^<]*</span>' \
-	| sed 's!<dl><dt><a href=\"/!!; \
+	| sed  's!<dl><dt><a href=\"/!!; \
 		s!\">!|!; \
 		s!<[/]*b>!!g; \
 		N;N;N;s!\n<span class=\"[pesud]*\">!|!g; \
