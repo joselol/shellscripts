@@ -8,9 +8,9 @@
 ### CONFIGURATION ###
 # program to use for torrent download
 # magnet link to torrent will be appended
-# you can add -- at the end to indicate end of options 
+# you can add -- at the end to indicate end of options
 # (if your program supports it, most do)
-program='transmission-remote -a'
+program='/usr/bin/transmission-remote -a'
 
 # show N first matches by default
 limit=15
@@ -63,7 +63,7 @@ chex() {
 }
 
 # script cmdline option handling
-while getopts :hn:CP:O:: opt ; do
+while getopts :hn:CP:: opt ; do
 	case "$opt" in
 		h) printhelp; exit 0;;
 		n) limit="$OPTARG";;
