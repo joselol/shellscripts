@@ -7,8 +7,10 @@
 
 ### CONFIGURATION ###
 # program to use for torrent download
-program='/usr/bin/transmission-remote'
-progopts='-a'
+# magnet link to torrent will be appended
+# you can add -- at the end to indicate end of options 
+# (if your program supports it, most do)
+program='transmission-remote -a'
 
 # show N first matches by default
 limit=15
@@ -43,10 +45,9 @@ printhelp() {
 	echo -e "\t-h\t\tShow help"
 	echo -e "\t-n [num]\tShow only first N results (default 15; max 100 [top] or 30 [search])"
 	echo -e "\t-C\t\tDo not use colors"
-	echo -e "\t-P [prog]\tSet torrent client"
-	echo -e "\t-O [opts]\tSet torrent client cmdline options"
+	echo -e "\t-P [prog]\tSet torrent client command (\`-P torrent-client\` OR \`-P \"torrent-client --options\"\`)"
 	echo
-	echo -e "Current client settings: $program $progopts [magnet link]"
+	echo -e "Current client settings: $program [magnet link]"
 }
 
 # change torrent client
@@ -61,18 +62,6 @@ chex() {
 	fi
 }
 
-# change torrent client options
-charg() {
-	sed "s!^progopts=.*!progopts=\'$progopts\'!" -i "$thisfile"
-	if [ $? -eq 0 ] ; then
-                echo "Cmdline options for client changed successfully."
-                exit 0
-        else 
-                echo -e "${errocolor}(EE) ${mesgcolor}==> Something went wrong!${nonecolor}"
-                exit 1
-        fi
-}
-
 # script cmdline option handling
 while getopts :hn:CP:O:: opt ; do
 	case "$opt" in
@@ -80,7 +69,6 @@ while getopts :hn:CP:O:: opt ; do
 		n) limit="$OPTARG";;
 		C) unset numbcolor namecolor sizecolor seedcolor peercolor nonecolor errocolor mesgcolor;;
 		P) program="$OPTARG"; chex;;
-		O) progopts="$OPTARG"; charg;;
 		*) echo -e "Unknown option(s)."; printhelp; exit 1;;
 	esac
 done
@@ -98,7 +86,8 @@ else
 fi
 
 # get results
-r=`curl -A Mozilla -b "lw=s" -s "https://thepiratebay.se/$url" \
+# Here be dragons!
+r=`curl -A Mozilla -b "lw=s" -m 15 -s "https://thepiratebay.se/$url" \
 	| grep -Eo '^<td><a href=\"/torrent/[^>]*>.*|^<td><nobr><a href=\"[^"]*|<td align=\"right\">[^<]*' \
 	| sed  's!^<td><a href=\"/torrent/[^>]*>!!; \
 		s!</a>$!!; \
@@ -126,28 +115,36 @@ echo "$r" \
 		-F '|' \
 		'{print NU N ") " NA $1 " " SI $3 " " SE $4 " " PE $5 NO; N++}'
 
-# read ID, ignore every character except digits
-read -p ">> Enter torrent No. to download: " down
-down=`echo "$down" | sed 's/[^[:digit:]]*//g' | head -n 1`
-
-# check if ID is valid and in range of results, download torrent
-if [ -z "$down" ] ; then
-	echo "Not a number!"
-	unset IFS
-	exit 1
-elif [ $down -ge 1 ] ; then
-	if [ $down -le $limit ] ; then
-		echo "Downloading..."
-		$program $progopts "`echo "$r" | awk -F '|' 'NR=='$down'{print $2; exit}'`"
-	else
-		echo "Number too high! ($down)"
-		unset IFS
-		exit 3
+# read ID(s), expand ranges, ignore everything else
+read -p ">> Torrents to download (eg. 1 3 5-7): " selection
+IFS=$'\n\ '
+for num in $selection ; do
+	if [ "$num" = "`echo $num | grep -o '[[:digit:]][[:digit:]]*'`" ] ; then
+		down="$down $num"
+	elif [ "$num" = "`echo $num | grep -o '[[:digit:]][[:digit:]]*-[[:digit:]][[:digit:]]*'`" ] ; then
+		seqstart="${num%-*}"
+		seqend="${num#*-}"
+		if [ $seqstart -le $seqend ] ; then
+			down="$down `seq $seqstart $seqend`"
+		fi
 	fi
-else
-	echo "Number too low! ($down)"
-	unset IFS
-	exit 2
-fi
+done
 
+# normalize download list, sort it and remove dupes
+down="$(echo $down | tr '\ ' '\n' | sort -n | uniq)"
+IFS=$'\n'
+
+# download all torrents in list
+echo -n "Downloading torrent(s): "
+for torrent in $down ; do
+	# check if ID is valid and in range of results, download torrent
+	if [ $torrent -ge 1 ] ; then
+		if [ $torrent -le $limit ] ; then
+			echo -n "$torrent "
+			# should be fixed, so no need to add quotes
+			eval "$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print $2; exit}'`" &> /dev/null
+		fi
+	fi
+done
+echo
 unset IFS
