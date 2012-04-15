@@ -17,7 +17,7 @@ q=`echo "$*" | od -t x1 -A n | tr ' ' '%' | tr -d '\n'`
 # fetch and parse result
 result=`wget -qO - "http://api.wolframalpha.com/v2/query?input=$q&appid=$API_KEY&format=plaintext"`
 if [ -n "`echo $result | grep 'Invalid appid'`" ] ; then
-	echo "Invalid API key! (Have you edited this script\'s config?)"
+	echo "Invalid API key! (Have you edited this script's config?)"
 	exit 1
 fi
 result=`echo "$result" \
@@ -27,7 +27,8 @@ result=`echo "$result" \
 	| sed  's!<plaintext>!!g; \
 		s!</plaintext>!!g; \
 		s!<pod title=.*!\\\x1b[1;36m&\\\x1b[0m!g; \
-		s!<pod title=.!!g' \
+		s!<pod title=.!!g; \
+		s!\&amp;!\&!' \
 	| tr '\x11' '\n' \
 	| sed  '/^$/d; \
 		s/\ \ */\ /g'`
