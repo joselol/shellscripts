@@ -119,6 +119,11 @@ done
 down="$(echo $down | tr '\ ' '\n' | sort -n | uniq)"
 IFS=$'\n'
 
+# check whether we're downloading something, else exit
+if [ -z "$down" ] ; then
+	exit 0
+fi
+
 # download all torrents in list
 echo -n "Downloading torrent(s): "
 for torrent in $down ; do
