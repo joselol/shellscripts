@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 #
 # by Sairon Istyar, 2012
 # distributed under the GPLv3 license
