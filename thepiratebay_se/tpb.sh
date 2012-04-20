@@ -146,10 +146,18 @@ for torrent in $down ; do
 	if [ $torrent -ge 1 ] ; then
 		if [ $torrent -le $limit ] ; then
 			echo -n "$torrent "
-			# should be fixed, so no need to add quotes
-			eval "$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print $2; exit}'`" &> /dev/null
+			status=$(eval "$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print $2; exit}'`" 2>&1)
+			echo "$status" | grep ' responded: .success.$' &> /dev/null
+			if [ $? -ne 0 ] ; then
+				echo -n '(failed!) '
+				report="$report\n(#$torrent) $status"
+			fi
 		fi
 	fi
 done
 echo
+if [ -n "$report" ] ; then
+	echo -n "Exited with errors:"
+	echo -e "$report"
+fi
 unset IFS
