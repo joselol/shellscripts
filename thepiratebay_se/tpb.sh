@@ -146,8 +146,8 @@ for torrent in $down ; do
 	if [ $torrent -ge 1 ] ; then
 		if [ $torrent -le $limit ] ; then
 			echo -n "$torrent "
-			status=$(eval "$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print $2; exit}'`" 2>&1)
-			echo "$status" | grep ' responded: .success.$' &> /dev/null
+			command="$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print $2; exit}'`"
+			status=$(eval "$command" 2>&1)
 			if [ $? -ne 0 ] ; then
 				echo -n '(failed!) '
 				report="$report\n(#$torrent) $status"
