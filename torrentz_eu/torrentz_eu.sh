@@ -132,7 +132,7 @@ for torrent in $down ; do
 		if [ $torrent -le $limit ] ; then
 			echo -n "$torrent "
 			# should be fixed, so no need to add quotes
-			eval "$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print "magnet:?xt=urn:btih:" $2; exit}'`" &> /dev/null
+			eval "$program `echo "$r" | awk -F '|' 'NR=='$torrent'{print "magnet:?xt=urn:btih:" $1; exit}'`" &> /dev/null
 		fi
 	fi
 done
