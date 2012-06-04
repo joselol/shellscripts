@@ -74,6 +74,7 @@ q=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
 # Here be dragons!
 cookie=`date +"%a %b %d %Y %T GMT%z (%Z)"`
 r=`curl -A Mozilla -b "_SESS=$cookie" -m 15 -s "https://torrentz.eu/search?f=$q" \
+	| grep -v '<a href=\"/z/' \
 	| grep -Eo '<dl><dt><a href=\"\/[[:alnum:]]*\">.*</a>|<span class=\"[speud]*\">[^<]*</span>' \
 	| sed  's!<dl><dt><a href=\"/!!; \
 		s!\">!|!; \
