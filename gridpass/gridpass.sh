@@ -34,6 +34,7 @@ usage() {
 	echo "	-c [cols]	number of columns in table"
 	echo "	-r [rows]	number of rows in table"
 	echo "	-l [length]	password length"
+	echo "	-u [user]	user's name (only used with -t option, useful if generating tables for more people)"
 	echo "	-g [prog]	use [prog] for generating passwords (in single quotes)"
 	echo "			special variables are '$NUM$' (number of pws to be generated)"
 	echo "			and '$LEN$' (length of one password)"
@@ -43,12 +44,13 @@ usage() {
 
 # parse cmdline options
 tflag=0
-while getopts tc:r:l:g: opt ; do
+while getopts tc:r:l:u:g: opt ; do
 	case $opt in
 		t) tflag=1;;
 		c) cols="$OPTARG";;
 		r) rows="$OPTARG";;
 		l) len="$OPTARG";;
+		u) author="$OPTARG";;
 		g) generator="$OPTARG";;
 		?) usage;;
 	esac
@@ -93,12 +95,15 @@ if [ -n "$1" ] ; then
 	exec > $1
 fi
 
-# get author's name
-# first try to parse full name out of user's GECOS field in /etc/passwd
-author=$(getent passwd $USER 2>/dev/null | cut -d ':' -f 5)
-# if that fails, get username
+# is author defined?
 if [ -z "$author" ] ; then
-	author="$USER"
+	# get author's name
+	# first try to parse full name out of user's GECOS field in /etc/passwd
+	author=$(getent passwd $USER 2>/dev/null | cut -d ':' -f 5)
+	# if that fails, get username
+	if [ -z "$author" ] ; then
+		author="$USER"
+	fi
 fi
 
 # output LaTeX source (headers)
