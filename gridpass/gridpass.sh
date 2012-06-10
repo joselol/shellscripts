@@ -111,9 +111,11 @@ cat <<EOF
 \documentclass{article}
 \usepackage[margin=0.5in,a4paper,landscape]{geometry}
 \usepackage[table,fixpdftex]{xcolor}
+\definecolor{verylightgray}{gray}{0.90}
 \title{GridPass - $numpws passwords of length $len}
 \author{$author}
 \begin{document}
+\tt{
 EOF
 
 # are we making a title?
@@ -124,7 +126,7 @@ fi
 # LaTeX source (body)
 cat <<EOF
 \begin{center}
-\rowcolors{1}{lightgray}{white}
+\rowcolors{1}{verylightgray}{white}
 \arrayrulecolor{black}
 \begin{tabular}{$format}
 	\hline
@@ -159,6 +161,7 @@ cat <<EOF
 	\\hline
 \end{tabular}
 \end{center}
+}
 \end{document}
 EOF
 
