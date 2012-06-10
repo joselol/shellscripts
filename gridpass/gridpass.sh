@@ -115,7 +115,6 @@ cat <<EOF
 \title{GridPass - $numpws passwords of length $len}
 \author{$author}
 \begin{document}
-\tt{
 EOF
 
 # are we making a title?
@@ -125,6 +124,7 @@ fi
 
 # LaTeX source (body)
 cat <<EOF
+\tt{
 \begin{center}
 \rowcolors{1}{verylightgray}{white}
 \arrayrulecolor{black}
