@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# by Sairon Istyar, 2012
+# distributed under the GPLv3 license
+#
+
 # some sane default values
 cols=10
 rows=40
