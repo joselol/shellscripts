@@ -1,0 +1,1 @@
+output PDF document if filename ends with .pdf, else only .tex without compiling PDF
